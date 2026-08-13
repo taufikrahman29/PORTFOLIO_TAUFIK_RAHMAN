@@ -22,7 +22,8 @@ import {
   getTestimonials,
 } from '@/lib/data';
 
-export const revalidate = 3600; // Revalidate data hourly
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export default async function HomePage() {
   const [

@@ -32,6 +32,20 @@ import {
   fallbackProjects,
   fallbackCertificates,
   fallbackTestimonials,
+  getProfile,
+  getEducation,
+  getExperiences,
+  getSkills,
+  getProjects,
+  getCertificates,
+  getTestimonials,
+  saveProfile,
+  saveEducation,
+  saveExperiences,
+  saveSkills,
+  saveProjects,
+  saveCertificates,
+  saveTestimonials,
   Profile,
   EducationItem,
   ExperienceItem,
@@ -77,8 +91,29 @@ export default function AdminDashboardPage() {
       setIsAuthenticated(true);
     }
 
-    const savedMsgs = JSON.parse(localStorage.getItem('taufik_portfolio_messages') || '[]');
-    setMessages(savedMsgs);
+    const loadAdminData = async () => {
+      const [p, edu, exp, sk, proj, cert, test] = await Promise.all([
+        getProfile(),
+        getEducation(),
+        getExperiences(),
+        getSkills(),
+        getProjects(),
+        getCertificates(),
+        getTestimonials(),
+      ]);
+      setProfile(p);
+      setEducation(edu);
+      setExperiences(exp);
+      setSkills(sk);
+      setProjects(proj);
+      setCertificates(cert);
+      setTestimonials(test);
+
+      const savedMsgs = JSON.parse(localStorage.getItem('taufik_portfolio_messages') || '[]');
+      setMessages(savedMsgs);
+    };
+
+    loadAdminData();
   }, []);
 
   const handleLogin = (e: React.FormEvent) => {
@@ -96,7 +131,16 @@ export default function AdminDashboardPage() {
     sessionStorage.removeItem('taufik_admin_auth');
   };
 
-  const triggerSaveNotification = () => {
+  const triggerSaveNotification = async () => {
+    await Promise.all([
+      saveProfile(profile),
+      saveEducation(education),
+      saveExperiences(experiences),
+      saveSkills(skills),
+      saveProjects(projects),
+      saveCertificates(certificates),
+      saveTestimonials(testimonials),
+    ]);
     setSavedNotice(true);
     setTimeout(() => setSavedNotice(false), 3000);
   };

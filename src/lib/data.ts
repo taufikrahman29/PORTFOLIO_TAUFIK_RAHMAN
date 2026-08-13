@@ -167,7 +167,6 @@ export const fallbackExperiences: ExperienceItem[] = [
 ];
 
 export const fallbackSkills: SkillItem[] = [
-  // Pengembangan Web
   { id: 'sk-1', category: 'Pengembangan Web', name: 'Next.js', level: 92 },
   { id: 'sk-2', category: 'Pengembangan Web', name: 'React.js', level: 95 },
   { id: 'sk-3', category: 'Pengembangan Web', name: 'TypeScript', level: 88 },
@@ -178,12 +177,10 @@ export const fallbackSkills: SkillItem[] = [
   { id: 'sk-8', category: 'Pengembangan Web', name: 'CSS', level: 95 },
   { id: 'sk-9', category: 'Pengembangan Web', name: 'Tailwind CSS', level: 96 },
 
-  // Basis Data
   { id: 'sk-10', category: 'Basis Data', name: 'MySQL', level: 90 },
   { id: 'sk-11', category: 'Basis Data', name: 'PostgreSQL', level: 88 },
   { id: 'sk-12', category: 'Basis Data', name: 'Database Management', level: 92 },
 
-  // Keamanan Siber
   { id: 'sk-13', category: 'Keamanan Siber', name: 'Digital Forensics', level: 85 },
   { id: 'sk-14', category: 'Keamanan Siber', name: 'Cybersecurity', level: 88 },
   { id: 'sk-15', category: 'Keamanan Siber', name: 'Network Analysis', level: 87 },
@@ -191,13 +188,11 @@ export const fallbackSkills: SkillItem[] = [
   { id: 'sk-17', category: 'Keamanan Siber', name: 'Autopsy', level: 86 },
   { id: 'sk-18', category: 'Keamanan Siber', name: 'FTK', level: 84 },
 
-  // Desain
   { id: 'sk-19', category: 'Desain', name: 'UI/UX', level: 92 },
   { id: 'sk-20', category: 'Desain', name: 'Figma', level: 94 },
   { id: 'sk-21', category: 'Desain', name: 'Adobe Photoshop', level: 86 },
   { id: 'sk-22', category: 'Desain', name: 'Adobe Illustrator', level: 82 },
 
-  // Teknologi Informasi
   { id: 'sk-23', category: 'Teknologi Informasi', name: 'Analisis Sistem', level: 92 },
   { id: 'sk-24', category: 'Teknologi Informasi', name: 'IT Support', level: 94 },
   { id: 'sk-25', category: 'Teknologi Informasi', name: 'Infrastruktur Jaringan', level: 88 },
@@ -408,6 +403,24 @@ export const fallbackTestimonials: TestimonialItem[] = [
   },
 ];
 
+// Helper for Browser LocalStorage Persistence
+function getLocalItem<T>(key: string, fallback: T): T {
+  if (typeof window === 'undefined') return fallback;
+  try {
+    const item = localStorage.getItem(key);
+    return item ? JSON.parse(item) : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+function setLocalItem<T>(key: string, value: T): void {
+  if (typeof window === 'undefined') return;
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+  } catch {}
+}
+
 // Data Fetching Functions
 export async function getProfile(): Promise<Profile> {
   if (isSupabaseConfigured && supabase) {
@@ -418,7 +431,7 @@ export async function getProfile(): Promise<Profile> {
       // fallback
     }
   }
-  return fallbackProfile;
+  return getLocalItem('taufik_portfolio_profile', fallbackProfile);
 }
 
 export async function getEducation(): Promise<EducationItem[]> {
@@ -430,7 +443,7 @@ export async function getEducation(): Promise<EducationItem[]> {
       // fallback
     }
   }
-  return fallbackEducation;
+  return getLocalItem('taufik_portfolio_education', fallbackEducation);
 }
 
 export async function getExperiences(): Promise<ExperienceItem[]> {
@@ -442,7 +455,7 @@ export async function getExperiences(): Promise<ExperienceItem[]> {
       // fallback
     }
   }
-  return fallbackExperiences;
+  return getLocalItem('taufik_portfolio_experiences', fallbackExperiences);
 }
 
 export async function getSkills(): Promise<SkillItem[]> {
@@ -454,7 +467,7 @@ export async function getSkills(): Promise<SkillItem[]> {
       // fallback
     }
   }
-  return fallbackSkills;
+  return getLocalItem('taufik_portfolio_skills', fallbackSkills);
 }
 
 export async function getProjects(): Promise<ProjectItem[]> {
@@ -466,7 +479,7 @@ export async function getProjects(): Promise<ProjectItem[]> {
       // fallback
     }
   }
-  return fallbackProjects;
+  return getLocalItem('taufik_portfolio_projects', fallbackProjects);
 }
 
 export async function getProjectBySlug(slug: string): Promise<ProjectItem | undefined> {
@@ -483,7 +496,7 @@ export async function getCertificates(): Promise<CertificateItem[]> {
       // fallback
     }
   }
-  return fallbackCertificates;
+  return getLocalItem('taufik_portfolio_certificates', fallbackCertificates);
 }
 
 export async function getTestimonials(): Promise<TestimonialItem[]> {
@@ -495,5 +508,97 @@ export async function getTestimonials(): Promise<TestimonialItem[]> {
       // fallback
     }
   }
-  return fallbackTestimonials;
+  return getLocalItem('taufik_portfolio_testimonials', fallbackTestimonials);
+}
+
+// Data Saving Functions for Admin Dashboard
+export async function saveProfile(profile: Profile): Promise<boolean> {
+  setLocalItem('taufik_portfolio_profile', profile);
+  if (isSupabaseConfigured && supabase) {
+    try {
+      const { error } = await supabase.from('profiles').upsert([profile]);
+      if (error) console.error('Supabase profile save error:', error);
+    } catch (e) {
+      console.error(e);
+    }
+  }
+  return true;
+}
+
+export async function saveEducation(education: EducationItem[]): Promise<boolean> {
+  setLocalItem('taufik_portfolio_education', education);
+  if (isSupabaseConfigured && supabase) {
+    try {
+      const { error } = await supabase.from('education').upsert(education);
+      if (error) console.error('Supabase education save error:', error);
+    } catch (e) {
+      console.error(e);
+    }
+  }
+  return true;
+}
+
+export async function saveExperiences(experiences: ExperienceItem[]): Promise<boolean> {
+  setLocalItem('taufik_portfolio_experiences', experiences);
+  if (isSupabaseConfigured && supabase) {
+    try {
+      const { error } = await supabase.from('experiences').upsert(experiences);
+      if (error) console.error('Supabase experiences save error:', error);
+    } catch (e) {
+      console.error(e);
+    }
+  }
+  return true;
+}
+
+export async function saveSkills(skills: SkillItem[]): Promise<boolean> {
+  setLocalItem('taufik_portfolio_skills', skills);
+  if (isSupabaseConfigured && supabase) {
+    try {
+      const { error } = await supabase.from('skills').upsert(skills);
+      if (error) console.error('Supabase skills save error:', error);
+    } catch (e) {
+      console.error(e);
+    }
+  }
+  return true;
+}
+
+export async function saveProjects(projects: ProjectItem[]): Promise<boolean> {
+  setLocalItem('taufik_portfolio_projects', projects);
+  if (isSupabaseConfigured && supabase) {
+    try {
+      const { error } = await supabase.from('projects').upsert(projects);
+      if (error) console.error('Supabase projects save error:', error);
+    } catch (e) {
+      console.error(e);
+    }
+  }
+  return true;
+}
+
+export async function saveCertificates(certificates: CertificateItem[]): Promise<boolean> {
+  setLocalItem('taufik_portfolio_certificates', certificates);
+  if (isSupabaseConfigured && supabase) {
+    try {
+      const { error } = await supabase.from('certificates').upsert(certificates);
+      if (error) console.error('Supabase certificates save error:', error);
+    } catch (e) {
+      console.error(e);
+    }
+  }
+  return true;
+}
+
+export async function saveTestimonials(testimonials: TestimonialItem[]): Promise<boolean> {
+  setLocalItem('taufik_portfolio_testimonials', testimonials);
+  if (isSupabaseConfigured && supabase) {
+    try {
+      const { error } = await supabase.from('testimonials').upsert(testimonials);
+      if (error) console.error('Supabase testimonials save error:', error);
+    } catch (e) {
+      console.error(e);
+    }
+  }
+  return true;
 }
