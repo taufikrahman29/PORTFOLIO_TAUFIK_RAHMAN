@@ -425,7 +425,7 @@ function setLocalItem<T>(key: string, value: T): void {
 export async function getProfile(): Promise<Profile> {
   if (isSupabaseConfigured && supabase) {
     try {
-      const { data, error } = await supabase.from('profiles').select('*').single();
+      const { data, error } = await supabase.from('profiles').select('*').limit(1).single();
       if (!error && data) return data as Profile;
     } catch {
       // fallback
@@ -516,7 +516,9 @@ export async function saveProfile(profile: Profile): Promise<boolean> {
   setLocalItem('taufik_portfolio_profile', profile);
   if (isSupabaseConfigured && supabase) {
     try {
-      const { error } = await supabase.from('profiles').upsert([profile]);
+      const payload = { ...profile };
+      if (!payload.id) delete payload.id;
+      const { error } = await supabase.from('profiles').upsert([payload]);
       if (error) console.error('Supabase profile save error:', error);
     } catch (e) {
       console.error(e);
@@ -568,7 +570,8 @@ export async function saveProjects(projects: ProjectItem[]): Promise<boolean> {
   setLocalItem('taufik_portfolio_projects', projects);
   if (isSupabaseConfigured && supabase) {
     try {
-      const { error } = await supabase.from('projects').upsert(projects);
+      const cleanProjects = projects.map(({ features, technologies, gallery, ...rest }) => rest);
+      const { error } = await supabase.from('projects').upsert(cleanProjects);
       if (error) console.error('Supabase projects save error:', error);
     } catch (e) {
       console.error(e);
