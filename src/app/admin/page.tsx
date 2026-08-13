@@ -255,22 +255,55 @@ export default function AdminDashboardPage() {
     setIsProjectModalOpen(true);
   };
 
-  // Handle Multi Image Upload Convert to Data URL
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Compress & Resize Image File to Lightweight Data URL (~50-100KB)
+  const compressImageFile = (file: File, maxWidth = 1000, maxHeight = 1000, quality = 0.75): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = document.createElement('img');
+        img.onload = () => {
+          let width = img.width;
+          let height = img.height;
+
+          if (width > maxWidth) {
+            height = Math.round((height * maxWidth) / width);
+            width = maxWidth;
+          }
+          if (height > maxHeight) {
+            width = Math.round((width * maxHeight) / height);
+            height = maxHeight;
+          }
+
+          const canvas = document.createElement('canvas');
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          if (!ctx) {
+            resolve(e.target?.result as string);
+            return;
+          }
+          ctx.drawImage(img, 0, 0, width, height);
+          const compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
+          resolve(compressedDataUrl);
+        };
+        img.onerror = () => reject(new Error('Gagal membaca file gambar.'));
+        img.src = e.target?.result as string;
+      };
+      reader.onerror = () => reject(new Error('Gagal membaca file.'));
+      reader.readAsDataURL(file);
+    });
+  };
+
+  // Handle Multi Image Upload Convert & Compress to Data URL
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
     setProjectFormError(null);
-    const newImages: string[] = [...projectForm.gallery];
+    const currentGallery = [...projectForm.gallery];
 
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
-
-      // Validate File Size (Max 5MB)
-      if (file.size > 5 * 1024 * 1024) {
-        setProjectFormError(`Ukuran file "${file.name}" melebihi 5MB.`);
-        return;
-      }
 
       // Validate Image Type
       if (!file.type.startsWith('image/')) {
@@ -278,21 +311,21 @@ export default function AdminDashboardPage() {
         return;
       }
 
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        if (event.target?.result) {
-          if (newImages.length < 4) {
-            newImages.push(event.target.result as string);
-            setProjectForm((prev) => ({
-              ...prev,
-              gallery: [...newImages],
-              image_url: newImages[0],
-            }));
-          }
+      try {
+        if (currentGallery.length < 4) {
+          const compressedUrl = await compressImageFile(file);
+          currentGallery.push(compressedUrl);
         }
-      };
-      reader.readAsDataURL(file);
+      } catch (err) {
+        console.error('Error compressing image:', err);
+      }
     }
+
+    setProjectForm((prev) => ({
+      ...prev,
+      gallery: currentGallery,
+      image_url: currentGallery[0] || '',
+    }));
   };
 
   // Handle Direct Image URL Add

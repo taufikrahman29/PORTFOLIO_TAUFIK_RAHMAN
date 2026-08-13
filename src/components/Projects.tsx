@@ -55,9 +55,10 @@ export default function Projects({ projectsList }: ProjectsProps) {
                 {/* Image Container */}
                 <div className="relative w-full h-52 overflow-hidden bg-slate-800">
                   <Image
-                    src={project.image_url}
+                    src={project.image_url || (project.gallery && project.gallery[0]) || 'https://images.unsplash.com/photo-1551836022-d5d88e9218df?auto=format&fit=crop&w=800&q=80'}
                     alt={project.title}
                     fill
+                    unoptimized={true}
                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                     className="object-cover group-hover:scale-110 transition-transform duration-500"
                   />

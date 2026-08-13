@@ -65,9 +65,10 @@ export default async function ProjectDetailPage({
           {/* Main Hero Banner Image */}
           <div className="relative w-full h-64 sm:h-96 lg:h-[450px] rounded-3xl overflow-hidden shadow-2xl mb-12 border border-slate-200 dark:border-slate-800">
             <Image
-              src={project.image_url}
+              src={project.image_url || (project.gallery && project.gallery[0])}
               alt={project.title}
               fill
+              unoptimized={true}
               className="object-cover"
               priority
             />
@@ -211,6 +212,7 @@ export default async function ProjectDetailPage({
                         src={imgUrl}
                         alt={`Galeri ${project.title} ${gIdx + 1}`}
                         fill
+                        unoptimized={true}
                         className="object-cover hover:scale-105 transition-transform duration-300"
                       />
                     </div>

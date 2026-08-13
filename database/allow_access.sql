@@ -1,5 +1,5 @@
--- Supabase RLS Permission Fix for Portfolio
--- Run this in Supabase SQL Editor to allow public read/write permissions from Admin & Website
+-- Supabase RLS & Column Type Fix for Portfolio
+-- Run this in Supabase SQL Editor to allow public read/write permissions & unlimited image URL lengths
 
 ALTER TABLE IF EXISTS profiles DISABLE ROW LEVEL SECURITY;
 ALTER TABLE IF EXISTS education DISABLE ROW LEVEL SECURITY;
@@ -13,3 +13,8 @@ ALTER TABLE IF EXISTS certificates DISABLE ROW LEVEL SECURITY;
 ALTER TABLE IF EXISTS testimonials DISABLE ROW LEVEL SECURITY;
 ALTER TABLE IF EXISTS contact_messages DISABLE ROW LEVEL SECURITY;
 ALTER TABLE IF EXISTS visitors DISABLE ROW LEVEL SECURITY;
+
+-- Ensure image columns accept long Data URLs
+ALTER TABLE IF EXISTS projects ALTER COLUMN image_url TYPE TEXT;
+ALTER TABLE IF EXISTS profiles ALTER COLUMN avatar_url TYPE TEXT;
+ALTER TABLE IF EXISTS certificates ALTER COLUMN image_url TYPE TEXT;
