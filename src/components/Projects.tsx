@@ -83,6 +83,11 @@ export default function Projects({ projectsList }: ProjectsProps) {
 
                 {/* Content */}
                 <div className="p-6">
+                  {project.category && (
+                    <span className="text-[10px] font-extrabold text-blue-600 dark:text-blue-400 uppercase tracking-wider block mb-1">
+                      {project.category}
+                    </span>
+                  )}
                   <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
                     {project.title}
                   </h3>

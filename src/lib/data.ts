@@ -56,13 +56,15 @@ export interface ProjectItem {
   role: string;
   impact: string;
   year: string;
+  category?: string;
+  client?: string;
   image_url: string;
   github_url: string;
   demo_url: string;
   is_featured: boolean;
   features?: string[];
   technologies?: string[];
-  gallery?: string[];
+  gallery: string[];
 }
 
 export interface CertificateItem {
@@ -126,9 +128,7 @@ export async function getProfile(): Promise<Profile> {
     try {
       const { data, error } = await supabase.from('profiles').select('*').limit(1).single();
       if (!error && data) return data as Profile;
-    } catch {
-      // fallback
-    }
+    } catch {}
   }
   return getLocalItem('taufik_portfolio_profile', fallbackProfile);
 }
@@ -138,9 +138,7 @@ export async function getEducation(): Promise<EducationItem[]> {
     try {
       const { data, error } = await supabase.from('education').select('*').order('created_at', { ascending: false });
       if (!error && data && data.length > 0) return data as EducationItem[];
-    } catch {
-      // fallback
-    }
+    } catch {}
   }
   return getLocalItem('taufik_portfolio_education', fallbackEducation);
 }
@@ -150,9 +148,7 @@ export async function getExperiences(): Promise<ExperienceItem[]> {
     try {
       const { data, error } = await supabase.from('experiences').select('*').order('created_at', { ascending: false });
       if (!error && data && data.length > 0) return data as ExperienceItem[];
-    } catch {
-      // fallback
-    }
+    } catch {}
   }
   return getLocalItem('taufik_portfolio_experiences', fallbackExperiences);
 }
@@ -162,9 +158,7 @@ export async function getSkills(): Promise<SkillItem[]> {
     try {
       const { data, error } = await supabase.from('skills').select('*');
       if (!error && data && data.length > 0) return data as SkillItem[];
-    } catch {
-      // fallback
-    }
+    } catch {}
   }
   return getLocalItem('taufik_portfolio_skills', fallbackSkills);
 }
@@ -174,9 +168,7 @@ export async function getProjects(): Promise<ProjectItem[]> {
     try {
       const { data, error } = await supabase.from('projects').select('*').order('is_featured', { ascending: false });
       if (!error && data && data.length > 0) return data as ProjectItem[];
-    } catch {
-      // fallback
-    }
+    } catch {}
   }
   return getLocalItem('taufik_portfolio_projects', fallbackProjects);
 }
@@ -191,9 +183,7 @@ export async function getCertificates(): Promise<CertificateItem[]> {
     try {
       const { data, error } = await supabase.from('certificates').select('*');
       if (!error && data && data.length > 0) return data as CertificateItem[];
-    } catch {
-      // fallback
-    }
+    } catch {}
   }
   return getLocalItem('taufik_portfolio_certificates', fallbackCertificates);
 }
@@ -203,11 +193,35 @@ export async function getTestimonials(): Promise<TestimonialItem[]> {
     try {
       const { data, error } = await supabase.from('testimonials').select('*');
       if (!error && data && data.length > 0) return data as TestimonialItem[];
-    } catch {
-      // fallback
-    }
+    } catch {}
   }
   return getLocalItem('taufik_portfolio_testimonials', fallbackTestimonials);
+}
+
+// Single Project API CRUD Helpers
+export async function createProjectApi(project: ProjectItem) {
+  const res = await fetch('/api/admin/projects', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(project),
+  });
+  return res.json();
+}
+
+export async function updateProjectApi(project: ProjectItem) {
+  const res = await fetch('/api/admin/projects', {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(project),
+  });
+  return res.json();
+}
+
+export async function deleteProjectApi(id: string) {
+  const res = await fetch(`/api/admin/projects?id=${encodeURIComponent(id)}`, {
+    method: 'DELETE',
+  });
+  return res.json();
 }
 
 // Data Saving Functions for Admin Dashboard
