@@ -46,6 +46,7 @@ import {
   saveProjects,
   saveCertificates,
   saveTestimonials,
+  syncAllAdminData,
   Profile,
   EducationItem,
   ExperienceItem,
@@ -132,15 +133,15 @@ export default function AdminDashboardPage() {
   };
 
   const triggerSaveNotification = async () => {
-    await Promise.all([
-      saveProfile(profile),
-      saveEducation(education),
-      saveExperiences(experiences),
-      saveSkills(skills),
-      saveProjects(projects),
-      saveCertificates(certificates),
-      saveTestimonials(testimonials),
-    ]);
+    await syncAllAdminData({
+      profile,
+      education,
+      experiences,
+      skills,
+      projects,
+      certificates,
+      testimonials,
+    });
     setSavedNotice(true);
     setTimeout(() => setSavedNotice(false), 3000);
   };
